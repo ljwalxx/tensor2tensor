@@ -456,7 +456,7 @@ def beam_search(symbols_to_logits_fn,
   batch_size = common_layers.shape_list(initial_ids)[0]
 
   # Assume initial_ids are prob 1.0
-  initial_log_probs = tf.constant([[0.] + [-INF] * (beam_size - 1)])
+  initial_log_probs = tf.concat([tf.constant([[0.]]), tf.fill((1, beam_size - 1), -INF)], axis = 1)
   # Expand to beam_size (batch_size, beam_size)
   alive_log_probs = tf.tile(initial_log_probs, [batch_size, 1])
 
@@ -799,8 +799,8 @@ def beam_search(symbols_to_logits_fn,
        parallel_iterations=1,
        back_prop=False)
 
-  alive_seq.set_shape((None, beam_size, None))
-  finished_seq.set_shape((None, beam_size, None))
+  alive_seq.set_shape((None, None, None))
+  finished_seq.set_shape((None, None, None))
 
   # Accounting for corner case: It's possible that no sequence in alive for a
   # particular batch item ever reached EOS. In that case, we should just copy
